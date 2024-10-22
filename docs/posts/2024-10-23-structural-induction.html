@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Form and Function - Structural Induction</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Form and Function</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Structural Induction</h1>
+
+            <div class="info">
+    Posted on October 23, 2024
+    
+</div>
+
+<p>Equational reasoning is a reasoning approach where one substitutes
+equals for equals. In Haskell, this is justified by its referential
+transparency.</p>
+<p>In this post, let us embark on a journey of structural induction, which is
+an important technique in equational reasoning. Structural induction is so-named
+because it is an induction based on structures of data types.</p>
+<p>Take lists, for example. A list in Haskell is either</p>
+<ul>
+<li>an empty list <code>[]</code>, or</li>
+<li>an element <code>x</code> prepended into another list <code>xs</code>, written as <code>(x:xs)</code>.</li>
+</ul>
+<p>Using structural induction, one may prove properties about lists by</p>
+<ul>
+<li>showing that the property holds for empty lists, and</li>
+<li>assuming that the property holds for <code>xs</code>, show that the property holds for
+<code>(x:xs)</code>.</li>
+</ul>
+<p>Let us now work through an example.</p>
+<h2 id="map-from-foldr"><code>map</code> from <code>foldr</code></h2>
+<p>Working with lists in Haskell, one would soon run across the higher-order
+functions <code>map</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span><span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span> f [] <span class="ot">=</span> []</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span> f (x <span class="op">:</span> xs) <span class="ot">=</span> f x <span class="op">:</span> <span class="fu">map</span> f xs</span></code></pre></div>
+<p>Clearly, <code>map f xs</code> applies <code>f</code> uniformly to each element of <code>xs</code>, if any.
+What is perhaps less well-known, however, is that folds (both <code>foldr</code> and <code>foldl</code>)
+are strictly more expressive than <code>map</code>:</p>
+<ul>
+<li><p>One cannot define <code>foldl</code> or <code>foldr</code> via <code>map</code> since the latter always returns
+a list, whereas folds can return any type:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> (<span class="op">+</span>) <span class="dv">0</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="co">-- returns an integer</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> (<span class="op">&amp;&amp;</span>) <span class="dt">True</span> []  <span class="co">-- returns a boolean</span></span></code></pre></div></li>
+<li><p>On the other hand, one can easily derive <code>map</code> using <code>foldr</code> and <code>foldl</code>, as we
+will show shortly. Furthermore, since <code>foldr</code> and <code>foldl</code>
+<a href="../posts/2024-10-21-foldr-and-foldl.html">are functionally equivalent</a>, we will
+use <code>foldr</code> here.</p></li>
+</ul>
+<p>Recall the definition of <code>foldr</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span><span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f z [] <span class="ot">=</span> z</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f z (x <span class="op">:</span> xs) <span class="ot">=</span> f x (<span class="fu">foldr</span> f z xs)</span></code></pre></div>
+<p>Notice that the return type of <code>foldr</code> is dictated by the type of its initial
+accumulator <code>z</code>. Since <code>map</code> returns a list, a reasonable choice for the initial
+accumulator is the empty list <code>[]</code>.</p>
+<p>With that in mind, the definition of <code>map</code> in terms of <code>foldr</code> is straightforward:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span> f xs <span class="ot">=</span> <span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> f x <span class="op">:</span> acc) [] xs</span></code></pre></div>
+<p>Let’s verify that the above definition is correct by structural induction on <code>xs</code>.</p>
+<ul>
+<li><p>Base case <code>xs = []</code></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> f x <span class="op">:</span> acc) [] []</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> []</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">map</span> f []</span></code></pre></div></li>
+<li><p>Inductive case <code>xs = x : xs</code> with the inductive hypothesis:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">forall</span> f xs<span class="op">.</span> <span class="fu">map</span> f xs <span class="ot">=</span> <span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> f x <span class="op">:</span> acc) [] xs</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> f x <span class="op">:</span> acc) [] (x <span class="op">:</span> xs)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of foldr</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> (\x acc <span class="ot">-&gt;</span> f x <span class="op">:</span> acc) x (<span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> f x <span class="op">:</span> acc) [] xs)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- lambda application</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> f x <span class="op">:</span> <span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> f x <span class="op">:</span> acc) [] xs</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- inductive hypothesis</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> f x <span class="op">:</span> <span class="fu">map</span> f xs</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of map</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">map</span> f (x <span class="op">:</span> xs)</span></code></pre></div></li>
+</ul>
+<h2 id="exercises">Exercises</h2>
+<ol type="1">
+<li><p>Define <code>filter</code> in terms of <code>foldr</code> and show that your definition is correct
+by structural induction. Recall that the definition of <code>filter</code> is</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span><span class="ot"> ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span> p [] <span class="ot">=</span> []</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span> p (x <span class="op">:</span> xs) <span class="ot">=</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">if</span> p x <span class="kw">then</span> x <span class="op">:</span> <span class="fu">filter</span> p xs <span class="kw">else</span> <span class="fu">filter</span> p xs</span></code></pre></div></li>
+<li><p>Structural induction works on any inductively-defined data structure. For example,
+one may define binary trees as:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">Tree</span> a <span class="ot">=</span> <span class="dt">Leaf</span> <span class="op">|</span> <span class="dt">Node</span> a (<span class="dt">Tree</span> a) (<span class="dt">Tree</span> a)</span></code></pre></div>
+<p>Analoguously to lists, one can define <code>map</code> and <code>foldr</code> for binary trees as follows:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ot">mapTree ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> <span class="dt">Tree</span> b</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mapTree f <span class="dt">Leaf</span> <span class="ot">=</span> <span class="dt">Leaf</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mapTree f (<span class="dt">Node</span> x left right) <span class="ot">=</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Node</span> (f x) (mapTree f left) (mapTree f right)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="ot">foldrTree ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> <span class="dt">Tree</span> a <span class="ot">-&gt;</span> b</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>foldrTree f z <span class="dt">Leaf</span> <span class="ot">=</span> z</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>foldrTree f z (<span class="dt">Node</span> x left right) <span class="ot">=</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  f x (foldrTree f z left) (foldrTree f z right)</span></code></pre></div>
+<p>Define <code>mapTree</code> in terms of <code>foldrTree</code> and show its correctness by structural
+induction.</p></li>
+</ol>
+
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
