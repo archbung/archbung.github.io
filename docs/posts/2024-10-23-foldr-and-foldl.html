@@ -90,7 +90,7 @@ list element <code>x</code>.</p>
 of <code>foldl</code> in terms of <code>foldr</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f z xs <span class="ot">=</span> <span class="fu">foldr</span> step <span class="fu">id</span> xs z</span></code></pre></div>
 <p>To show that the above definition is correct, we may proceed with
-<a href="../posts/2024-10-23-structural-induction.markdown">structural induction</a> on <code>xs</code>.</p>
+<a href="../posts/2024-10-23-structural-induction.html">structural induction</a> on <code>xs</code>.</p>
 <ul>
 <li><p>Base case <code>xs = []</code></p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">foldr</span> step <span class="fu">id</span> [] z</span>

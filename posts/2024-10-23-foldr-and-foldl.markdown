@@ -93,7 +93,7 @@ foldl f z xs = foldr step id xs z
 ```
 
 To show that the above definition is correct, we may proceed with
-[structural induction](/posts/2024-10-23-structural-induction.markdown) on `xs`.
+[structural induction](/posts/2024-10-23-structural-induction.html) on `xs`.
 
 - Base case `xs = []`
 
