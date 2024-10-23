@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Form and Function - Folding Left and Right</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Form and Function</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Folding Left and Right</h1>
+
+            <div class="info">
+    Posted on October 23, 2024
+    
+</div>
+
+<p>Many moons ago, while I was reading the venerable <a href="https://book.realworldhaskell.org/">Real-World Haskell</a>,
+I came across a problem of defining right fold in terms of left fold (and vice-versa)
+without reversing the input list. This post aims to provide just that.</p>
+<h2 id="folding-revisited">Folding Revisited</h2>
+<p>Folding (also known as reducing) is essentially summarizing a collection
+of values into a result. For lists, a fold is a higher-order function that
+takes a binary function, an initial accumulator value, and a list. It then
+iterate over the list, updating the accumulator with the given binary function
+along the way.</p>
+<p>Since some binary functions are not associative, the direction of the evaluation
+matters. As such, there are two kinds of folds: <em>right fold</em>, which evaluates from
+the right, and <em>left fold</em>, which evaluates from the left.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- left foldl</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span><span class="ot"> ::</span> (b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f z [] <span class="ot">=</span> z</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f z (x <span class="op">:</span> xs) <span class="ot">=</span> <span class="fu">foldl</span> f (f z x) xs</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">-- right foldl</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span><span class="ot"> ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f z [] <span class="ot">=</span> z</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f z (x <span class="op">:</span> xs) <span class="ot">=</span> f x (<span class="fu">foldr</span> f z xs)</span></code></pre></div>
+<p>Note that</p>
+<ul>
+<li>Both folds iterate the list from the left.</li>
+<li><code>foldl</code> is tail-recursive, which combined with strictness annotations could be
+very efficient.</li>
+<li>Since Haskell is lazy, <code>foldr</code> can be productive even if the input list is infinite.
+For example, <code>foldr (head . (:)) [] [1..]</code> would evaluate immediately to <code>1</code>.</li>
+</ul>
+<p>As mentioned previously, the order of the evaluation matters for non-associative
+binary functions. For example,</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> (<span class="op">-</span>) <span class="dv">0</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="co">-- 1-(2-(3-0)) = 2</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> (<span class="op">-</span>) <span class="dv">0</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="co">-- ((0-1)-2)-3 = -6</span></span></code></pre></div>
+<h2 id="folding-left-and-right">Folding Left and Right</h2>
+<p>Since <code>foldr</code> evaluates from the right whereas <code>foldl</code> evaluates from the left,
+to define one using the other (and vice-versa) one needs to deal with this
+fundamental difference somehow. The key insight here is to:</p>
+<ul>
+<li>delay evaluation via function calls,</li>
+<li>build up a chain of function compositions by partially applying the
+supplied function in the correct order, and</li>
+<li>apply the resulting function to the initial accumulator.</li>
+</ul>
+<h3 id="foldl-from-foldr"><code>foldl</code> from <code>foldr</code></h3>
+<p>Using the insight above, we arrive at the following definition:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f z xs <span class="ot">=</span> <span class="fu">foldr</span> step accum xs z</span></code></pre></div>
+<p>What remains is to correctly define <code>step</code> and <code>accum</code>. To derive <code>accum</code>,
+recall that <code>foldl f z [] = z</code>. Since <code>foldr step accum [] z = accum z</code>,
+this means that <code>accum = id</code>.</p>
+<p>Deriving <code>step</code> is more involved. Thankfully <code>GHCi</code> is there to tell us
+that its type is <code>step :: a -&gt; (b -&gt; b) -&gt; (b -&gt; b)</code>. Note that it is
+just a higher-order version of the usual function argument to <code>foldr</code>,
+which is <code>a -&gt; b -&gt; b</code>.</p>
+<p>We thus arrive at the following definition:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">step ::</span> a <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> b)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>step x g y <span class="ot">=</span> g (f y x)</span></code></pre></div>
+<p>Intuitively, <code>g</code> is the current chain of function composition, which
+will be composed with a suitable application of <code>f</code> with the current
+list element <code>x</code>.</p>
+<p>With the definition of <code>step</code> sorted, we now have the complete definition
+of <code>foldl</code> in terms of <code>foldr</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f z xs <span class="ot">=</span> <span class="fu">foldr</span> step <span class="fu">id</span> xs z</span></code></pre></div>
+<p>To show that the above definition is correct, we may proceed with
+<a href="../posts/2024-10-23-structural-induction.markdown">structural induction</a> on <code>xs</code>.</p>
+<ul>
+<li><p>Base case <code>xs = []</code></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">foldr</span> step <span class="fu">id</span> [] z</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">id</span> z</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> z</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">foldl</span> f z []</span></code></pre></div></li>
+<li><p>Inductive case <code>xs = x : xs</code> with the inductive hypothesis</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">forall</span> f z xs<span class="op">.</span> <span class="fu">foldl</span> f z xs <span class="ot">=</span> <span class="fu">foldr</span> step <span class="fu">id</span> xs z</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">foldr</span> step <span class="fu">id</span> (x <span class="op">:</span> xs) z</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of foldr</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> step x (<span class="fu">foldr</span> step <span class="fu">id</span> xs) z</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of step</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">foldr</span> step <span class="fu">id</span> xs (f z x)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- inductive hypothesis with z = f z x</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">foldl</span> f (f z x) xs</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of foldl</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">foldl</span> f z (x <span class="op">:</span> xs)</span></code></pre></div></li>
+</ul>
+<h3 id="foldr-from-foldl"><code>foldr</code> from <code>foldl</code></h3>
+<p>Similarly, we have</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f z xs <span class="ot">=</span> <span class="fu">foldl</span> step accum xs z</span></code></pre></div>
+<p>where <code>accum = id</code> as before. In this case, <code>GHCi</code> tells us that the type
+of <code>step</code> is <code>(b -&gt; b) -&gt; a -&gt; (b -&gt; b)</code>, which is again just the higher-order
+version of the function argument to <code>foldl</code>, namely <code>b -&gt; a -&gt; b</code>. Also
+similarly to before, following the types would allow us to arrive at the
+following definition of <code>step</code> and consequently, <code>foldr</code> in terms of <code>foldl</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ot">step ::</span> (b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> b)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>step g x <span class="ot">=</span> g <span class="op">.</span> f x</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f z xs <span class="ot">=</span> <span class="fu">foldl</span> step <span class="fu">id</span> xs z</span></code></pre></div>
+<p>To show the correctness of the above definition, we may also proceed with
+structural induction on <code>xs</code>. Note that, in contrast to <code>foldr</code>, <code>foldl</code>
+updates the accumulator at each recursive calls.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> f z (x <span class="op">:</span> xs) <span class="ot">=</span> <span class="fu">foldl</span> f (f z x) xs</span></code></pre></div>
+<p>Since we start with the function <code>id</code> as our initial accumulator, for the
+proof to go through we have to abstract it away. As such, we instead
+need to show the stronger statement below:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">forall</span> f g z xs<span class="op">.</span> g (<span class="fu">foldr</span> f z xs) <span class="ot">=</span> <span class="fu">foldl</span> step g xs z</span></code></pre></div>
+<p>The desired result can then be shown by instantiating <code>g</code> with <code>id</code>.</p>
+<ul>
+<li><p>Base case <code>xs = []</code></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">foldl</span> step g [] z</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> g z</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> g (<span class="fu">foldr</span> f z [])</span></code></pre></div></li>
+<li><p>Inductive case <code>xs = x : xs</code> with the inductive hypothesis</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">forall</span> f g z xs<span class="op">.</span> g (<span class="fu">foldr</span> f z xs) <span class="ot">=</span> <span class="fu">foldl</span> step g xs z </span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">foldl</span> step g (x <span class="op">:</span> xs) z</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of foldl</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">foldl</span> step (step g x) xs z</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of step</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> <span class="fu">foldl</span> step (g <span class="op">.</span> f x) xs z</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- inductive hypothesis with g = g . f x</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> (g <span class="op">.</span> f x) (<span class="fu">foldr</span> f z xs)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of function composition</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> g (f x (<span class="fu">foldr</span> f z xs))</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">-- definition of foldr</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span> g (<span class="fu">foldr</span> f z (x <span class="op">:</span> xs))</span></code></pre></div></li>
+</ul>
+
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
