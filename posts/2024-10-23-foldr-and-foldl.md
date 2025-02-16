@@ -36,7 +36,8 @@ Note that
 - `foldl` is tail-recursive, which combined with strictness annotations could be
   very efficient.
 - Since Haskell is lazy, `foldr` can be productive even if the input list is infinite.
-  For example, `foldr (head . (:)) [] [1..]` would evaluate immediately to `1`.
+  For example, `foldr const 0 [1..]` would evaluate immediately to `1` since `const` 
+  ignores its second argument.
 
 As mentioned previously, the order of the evaluation matters for non-associative
 binary functions. For example,

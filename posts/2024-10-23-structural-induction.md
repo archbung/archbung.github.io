@@ -48,7 +48,7 @@ are strictly more expressive than `map`:
 
 - On the other hand, one can easily derive `map` using `foldr` and `foldl`, as we
   will show shortly. Furthermore, since `foldr` and `foldl`
-  [are functionally equivalent](/posts/2024-10-21-foldr-and-foldl.html), we will
+  [are functionally equivalent](/posts/2024-10-23-foldr-and-foldl.html), we will
   use `foldr` here.
 
 Recall the definition of `foldr`:
