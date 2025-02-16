@@ -54,7 +54,8 @@ the right, and <em>left fold</em>, which evaluates from the left.</p>
 <li><code>foldl</code> is tail-recursive, which combined with strictness annotations could be
 very efficient.</li>
 <li>Since Haskell is lazy, <code>foldr</code> can be productive even if the input list is infinite.
-For example, <code>foldr (head . (:)) [] [1..]</code> would evaluate immediately to <code>1</code>.</li>
+For example, <code>foldr const 0 [1..]</code> would evaluate immediately to <code>1</code> since <code>const</code>
+ignores its second argument.</li>
 </ul>
 <p>As mentioned previously, the order of the evaluation matters for non-associative
 binary functions. For example,</p>
