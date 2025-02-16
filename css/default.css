@@ -1,30 +1,67 @@
+:root {
+    /* Nord colors */
+    --nord0: #2E3440;  /* Dark gray (background) */
+    --nord1: #3B4252;  /* Lighter gray */
+    --nord2: #434C5E;  /* Even lighter gray */
+    --nord3: #4C566A;  /* Lightest gray */
+    --nord4: #D8DEE9;  /* Off white */
+    --nord5: #E5E9F0;  /* Whiter */
+    --nord6: #ECEFF4;  /* Whitest */
+    --nord7: #8FBCBB;  /* Cyan */
+    --nord8: #88C0D0;  /* Light blue */
+    --nord9: #81A1C1;  /* Blue */
+    --nord10: #5E81AC; /* Dark blue */
+    --nord11: #BF616A; /* Red */
+    --nord12: #D08770; /* Orange */
+    --nord13: #EBCB8B; /* Yellow */
+    --nord14: #A3BE8C; /* Green */
+    --nord15: #B48EAD; /* Purple */
+}
+
 body {
-    color: black;
+    color: var(--nord4);
+    background-color: var(--nord0);
     font-size: 16px;
     margin: 0px auto 0px auto;
     width: 600px;
+    line-height: 1.6;
 }
 
 div#header {
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid var(--nord3);
     margin-bottom: 30px;
     padding: 12px 0px 12px 0px;
 }
 
 div#logo a {
-    color: black;
+    color: var(--nord4);
     float: left;
     font-size: 18px;
     font-weight: bold;
     text-decoration: none;
 }
 
-div#header #navigation {
-    text-align: right;
+div#header {
+    border-bottom: 2px solid var(--nord3);
+    margin-bottom: 30px;
+    padding: 12px 0px 12px 0px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+div#logo {
+    flex-shrink: 0;  /* Prevent the logo from shrinking */
+    margin-right: 20px;  /* Add some space between logo and navigation */
+}
+
+div#header #navigation {
+    flex-shrink: 0;  /* Prevent navigation from shrinking */
+}
+
+/* Existing navigation styles */
 div#header #navigation a {
-    color: black;
+    color: var(--nord8);
     font-size: 18px;
     font-weight: bold;
     margin-left: 12px;
@@ -32,9 +69,22 @@ div#header #navigation a {
     text-transform: uppercase;
 }
 
+div#header #navigation a {
+    color: var(--nord8);
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: 12px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+div#header #navigation a:hover {
+    color: var(--nord7);
+}
+
 div#footer {
-    border-top: solid 2px black;
-    color: #555;
+    border-top: solid 2px var(--nord3);
+    color: var(--nord4);
     font-size: 12px;
     margin-top: 30px;
     padding: 12px 0px 12px 0px;
@@ -43,14 +93,64 @@ div#footer {
 
 h1 {
     font-size: 24px;
+    color: var(--nord6);
 }
 
 h2 {
     font-size: 20px;
+    color: var(--nord6);
 }
 
 div.info {
-    color: #555;
+    color: var(--nord4);
     font-size: 14px;
     font-style: italic;
+}
+
+/* Type signature styling */
+.type-signature {
+    font-family: "Fira Code", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+    font-size: 24px;
+    margin: 20px 0;
+}
+
+.type-signature .identifier {
+    color: var(--nord10);  /* Dark blue */
+}
+
+.type-signature .operator {
+    color: var(--nord9);   /* Blue */
+    margin: 0 8px;
+}
+
+.type-signature .type {
+    color: var(--nord14);  /* Green */
+}
+
+/* Add styles for links in the main content */
+a {
+    color: var(--nord8);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--nord7);
+    text-decoration: underline;
+}
+
+/* Add styles for code blocks */
+pre, code {
+    background-color: var(--nord1);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-family: "Fira Code", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+}
+
+pre {
+    padding: 1em;
+    overflow-x: auto;
+}
+
+pre code {
+    padding: 0;  /* Remove padding from nested code element */
 }
