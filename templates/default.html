@@ -26,14 +26,6 @@
                 <a href="/archive.html">Archive</a>
                 <a href="/about.html">About</a>
                 <a href="/rss.xml">RSS</a>
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <svg class="sun-icon" viewBox="0 0 24 24" style="display: none;">
-                        <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-width="2" fill="none"/>
-                    </svg>
-                    <svg class="moon-icon" viewBox="0 0 24 24">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
-                    </svg>
-                </button>
             </nav>
         </div>
     </header>
@@ -61,41 +53,5 @@
             </p>
         </div>
     </footer>
-
-    <script>
-        // Theme toggle functionality
-        function getTheme() {
-            return localStorage.getItem('theme') || 'light';
-        }
-
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            updateThemeIcon(theme);
-        }
-
-        function updateThemeIcon(theme) {
-            const sunIcon = document.querySelector('.sun-icon');
-            const moonIcon = document.querySelector('.moon-icon');
-            if (theme === 'dark') {
-                sunIcon.style.display = 'block';
-                moonIcon.style.display = 'none';
-            } else {
-                sunIcon.style.display = 'none';
-                moonIcon.style.display = 'block';
-            }
-        }
-
-        function toggleTheme() {
-            const currentTheme = getTheme();
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            setTheme(newTheme);
-        }
-
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            setTheme(getTheme());
-        });
-    </script>
 </body>
 </html>

@@ -132,23 +132,43 @@ body {
 
 /* Theme Toggle */
 .theme-toggle {
-    background: none;
-    border: none;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 0.375rem;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     margin-left: 1rem;
 }
 
 .theme-toggle:hover {
-    background-color: var(--bg-secondary);
+    background-color: var(--border);
+    transform: scale(1.05);
 }
 
 .theme-toggle svg {
     width: 20px;
     height: 20px;
-    fill: var(--text-secondary);
+    display: block;
+}
+
+.theme-toggle .sun-icon {
+    fill: #f59e0b;  /* Amber/orange for sun */
+    stroke: none;
+}
+
+.theme-toggle .moon-icon {
+    fill: #1f2937;    /* Dark gray for moon */
+    stroke: none;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .theme-toggle .sun-icon {
+    fill: #fbbf24;  /* Brighter yellow in dark mode */
+}
+
+[data-theme="dark"] .theme-toggle .moon-icon {
+    fill: #e5e7eb;    /* Light gray in dark mode */
 }
 
 /* Main Content */
