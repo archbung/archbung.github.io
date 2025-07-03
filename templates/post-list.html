@@ -1,7 +1,8 @@
-<ul>
+<ul class="post-list">
     $for(posts)$
         <li>
-            <a href="$url$">$title$</a> - $date$
+            <a href="$url$">$title$</a>
+            <span class="date">$date$ · $readingtime$</span>
         </li>
     $endfor$
 </ul>

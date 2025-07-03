@@ -1,8 +1,28 @@
-<div class="info">
-    Posted on $date$
-    $if(author)$
-        by $author$
-    $endif$
-</div>
+<article>
+    <div class="info">
+        Posted on $date$
+        $if(author)$
+            by $author$
+        $endif$
+        $if(tags)$
+        · Tagged: $tags$
+        $endif$
+    </div>
 
-$body$
+    $body$
+</article>
+
+<nav style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            $if(previousPost)$
+            <a href="$previousPost.url$">← $previousPost.title$</a>
+            $endif$
+        </div>
+        <div>
+            $if(nextPost)$
+            <a href="$nextPost.url$">$nextPost.title$ →</a>
+            $endif$
+        </div>
+    </div>
+</nav>
