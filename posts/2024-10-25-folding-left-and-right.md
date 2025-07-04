@@ -5,7 +5,7 @@ title: Folding Left and Right
 ---
 
 ```{=org}
-#+updated: 2025-07-03
+#+updated: 2025-07-04
 ```
 ```{=org}
 #+filetags: :writing:
@@ -133,6 +133,7 @@ foldr f z xs = foldl step accum xs z
 ```
 
 where `accum = id` as before.
+
 In this case, `GHCi` tells us that the type of `step` is `(b -> b) -> a -> (b -> b)`, which is again just the higher-order version of the function argument to `foldl`, namely `b -> a -> b`.
 Also similarly to before, following the types would allow us to arrive at the following definition of `step` and consequently, `foldr` in terms of `foldl`.
 

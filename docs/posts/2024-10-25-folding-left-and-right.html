@@ -121,8 +121,8 @@ Note that it is just a higher-order version of the usual function argument to <c
 <h3 id="foldr-from-foldl"><code>foldr</code> from <code>foldl</code></h3>
 <p>Similarly, we have</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> f z xs <span class="ot">=</span> <span class="fu">foldl</span> step accum xs z</span></code></pre></div>
-<p>where <code>accum = id</code> as before.
-In this case, <code>GHCi</code> tells us that the type of <code>step</code> is <code>(b -&gt; b) -&gt; a -&gt; (b -&gt; b)</code>, which is again just the higher-order version of the function argument to <code>foldl</code>, namely <code>b -&gt; a -&gt; b</code>.
+<p>where <code>accum = id</code> as before.</p>
+<p>In this case, <code>GHCi</code> tells us that the type of <code>step</code> is <code>(b -&gt; b) -&gt; a -&gt; (b -&gt; b)</code>, which is again just the higher-order version of the function argument to <code>foldl</code>, namely <code>b -&gt; a -&gt; b</code>.
 Also similarly to before, following the types would allow us to arrive at the following definition of <code>step</code> and consequently, <code>foldr</code> in terms of <code>foldl</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ot">step ::</span> (b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> b)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>step g x <span class="ot">=</span> g <span class="op">.</span> f x</span>
