@@ -1,38 +1,48 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>archbung :: Blog - Structural Induction</title>
-        <link rel="stylesheet" type="text/css" href="../css/default.css" />
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
-    </head>
-    <body>
-        <div id="header">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A blog about functional programming, type theory, and software engineering by a backend engineer passionate about FP">
+    <title>Structural Induction - archbung :: Blog</title>
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
+    <link rel="alternate" type="application/rss+xml" title="archbung :: Blog RSS" href="../rss.xml">
+</head>
+<body>
+    <header id="header">
+        <div class="container">
             <div id="logo">
-                <div class="type-signature">
-                    <span class="identifier">archbung</span>
-                    <span class="operator">::</span>
-                    <span class="type">Blog</span>
-                </div>
+                <a href="../">
+                    <div class="type-signature">
+                        <span class="identifier">archbung</span>
+                        <span class="operator">::</span>
+                        <span class="type">Blog</span>
+                    </div>
+                </a>
             </div>
-            <div id="navigation">
+            <nav id="navigation">
                 <a href="../">Home</a>
-                <a href="../about.html">About</a>
-                <a href="../contact.html">Contact</a>
                 <a href="../archive.html">Archive</a>
-            </div>
+                <a href="../about.html">About</a>
+                <a href="../rss.xml">RSS</a>
+            </nav>
         </div>
+    </header>
 
-        <div id="content">
-            <h1>Structural Induction</h1>
+    <main id="content">
+        
+        <h1>Structural Induction</h1>
+        
 
-            <div class="info">
-    Posted on October 23, 2024
-    
-</div>
+        <article>
+    <div class="info">
+        Posted on October 23, 2024
+        
+        
+    </div>
 
-<p>Equational reasoning is a reasoning approach where one substitutes
+    <p>Equational reasoning is a reasoning approach where one substitutes
 equals for equals. In Haskell, this is justified by its referential
 transparency.</p>
 <p>In this post, let us embark on a journey of structural induction, which is
@@ -62,9 +72,8 @@ are strictly more expressive than <code>map</code>:</p>
 <ul>
 <li><p>One cannot define <code>foldl</code> or <code>foldr</code> via <code>map</code> since the latter always returns
 a list, whereas folds can return any type:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> (<span class="op">+</span>) <span class="dv">0</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="co">-- returns an integer</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> (<span class="op">&amp;&amp;</span>) <span class="dt">True</span> []  <span class="co">-- returns a boolean</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldr</span> (<span class="op">+</span>) <span class="dv">0</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="co">-- returns an integer</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">foldl</span> (<span class="op">&amp;&amp;</span>) <span class="dt">True</span> []  <span class="co">-- returns a boolean</span></span></code></pre></div></li>
 <li><p>On the other hand, one can easily derive <code>map</code> using <code>foldr</code> and <code>foldl</code>, as we
 will show shortly. Furthermore, since <code>foldr</code> and <code>foldl</code>
 <a href="../posts/2024-10-23-foldr-and-foldl.html">are functionally equivalent</a>, we will
@@ -121,11 +130,27 @@ one may define binary trees as:</p>
 <p>Define <code>mapTree</code> in terms of <code>foldrTree</code> and show its correctness by structural
 induction.</p></li>
 </ol>
+</article>
 
+<nav style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            
         </div>
-        <div id="footer">
-            Site proudly generated by
-            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        <div>
+            
         </div>
-    </body>
+    </div>
+</nav>
+
+    </main>
+
+    <footer id="footer">
+        <div class="container">
+            <p>
+                © 2024 archbung. Built with <a href="http://jaspervdj.be/hakyll">Hakyll</a> and ❤️
+            </p>
+        </div>
+    </footer>
+</body>
 </html>

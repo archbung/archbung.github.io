@@ -1,37 +1,76 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>archbung :: Blog - About</title>
-        <link rel="stylesheet" type="text/css" href="./css/default.css" />
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
-    </head>
-    <body>
-        <div id="header">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A blog about functional programming, type theory, and software engineering by a backend engineer passionate about FP">
+    <title>About - archbung :: Blog</title>
+    <link rel="stylesheet" type="text/css" href="./css/default.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
+    <link rel="alternate" type="application/rss+xml" title="archbung :: Blog RSS" href="./rss.xml">
+</head>
+<body>
+    <header id="header">
+        <div class="container">
             <div id="logo">
-                <div class="type-signature">
-                    <span class="identifier">archbung</span>
-                    <span class="operator">::</span>
-                    <span class="type">Blog</span>
-                </div>
+                <a href="./">
+                    <div class="type-signature">
+                        <span class="identifier">archbung</span>
+                        <span class="operator">::</span>
+                        <span class="type">Blog</span>
+                    </div>
+                </a>
             </div>
-            <div id="navigation">
+            <nav id="navigation">
                 <a href="./">Home</a>
-                <a href="./about.html">About</a>
-                <a href="./contact.html">Contact</a>
                 <a href="./archive.html">Archive</a>
-            </div>
+                <a href="./about.html">About</a>
+                <a href="./rss.xml">RSS</a>
+            </nav>
         </div>
+    </header>
 
-        <div id="content">
-            <h1>About</h1>
+    <main id="content">
+        
+        <h1>About</h1>
+        
 
-            <p>Greetings! I’m Ibung, a software engineer with broad interests in functional programming languages, type theory, and formal verification.</p>
+        <h2 id="hi-im-archbung">Hi, I’m archbung 👋</h2>
+<p>I’m a backend engineer passionate about functional programming and type theory.
+I’ve been working as a mid-level backend engineer since August 2023 at Fazz, a large Indonesian fintech startup focused on financial inclusivity.</p>
+<h3 id="what-i-do">What I Do</h3>
+<p>While my day job involves Ruby on Rails, my heart belongs to the functional programming paradigm.
+I have a strong background in Haskell and I’m always exploring new functional languages like OCaml and Elixir.
+I enjoy tackling infrastructure and DevOps challenges, from rewriting deployment manifests to managing AWS database migrations.</p>
+<h3 id="what-i-write-about">What I Write About</h3>
+<p>On this blog, you’ll find posts about:</p>
+<ul>
+<li><strong>Functional Programming</strong>: Deep dives into FP concepts, from basic principles to advanced type theory</li>
+<li><strong>Real-world Applications</strong>: How to apply functional programming ideas in production environments</li>
+<li><strong>Software Engineering</strong>: Thoughts on architecture, best practices, and career development</li>
+<li><strong>Technical Explorations</strong>: My journey learning new languages and paradigms</li>
+</ul>
+<h3 id="my-philosophy">My Philosophy</h3>
+<p>I believe in the power of strong type systems and pure functions to create more reliable, maintainable software.
+While pragmatism often wins in production, I think there’s immense value in understanding the theoretical foundations of what we do.</p>
+<h3 id="beyond-code">Beyond Code</h3>
+<p>When I’m not coding, I’m an Olympic weightlifting enthusiast with almost 2 years of training under my belt.
+I’m also a single dad to a wonderful 10-year-old daughter who shares my interest in technology (she loves Scratch!) and bouldering.</p>
+<h3 id="get-in-touch">Get in Touch</h3>
+<p>Feel free to reach out if you want to discuss functional programming, type theory, or anything else that interests you:</p>
+<ul>
+<li>GitHub: <a href="https://github.com/archbung"><span class="citation" data-cites="archbung">@archbung</span></a></li>
+<li>Email: <a href="mailto:archbung@gmail.com">archbung@gmail.com</a></li>
+</ul>
+<p>Thanks for visiting my blog!</p>
+    </main>
+
+    <footer id="footer">
+        <div class="container">
+            <p>
+                © 2024 archbung. Built with <a href="http://jaspervdj.be/hakyll">Hakyll</a> and ❤️
+            </p>
         </div>
-        <div id="footer">
-            Site proudly generated by
-            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
-        </div>
-    </body>
+    </footer>
+</body>
 </html>

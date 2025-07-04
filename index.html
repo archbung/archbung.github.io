@@ -1,10 +1,28 @@
 ---
 title: Home
+home: true
 ---
 
-<p>Welcome to my blog, where I write about functional programming, type theory, and software engineering in general.</p>
+<section>
+    <h2>Recent Posts</h2>
+    $partial("templates/post-list.html")$
 
-<h2>Posts</h2>
-$partial("templates/post-list.html")$
+    <p style="text-align: center; margin-top: 2rem;">
+        <a href="/archive.html" style="font-weight: 500;">View all posts →</a>
+    </p>
+</section>
 
-<p>…or you can find more in the <a href="/archive.html">archives</a>.</p>
+<section style="background-color: var(--bg-secondary); border-radius: 0.5rem; padding: 2rem; margin-top: 3rem;">
+    <h2>About This Blog</h2>
+    <p>
+        Hi, I'm archbung 👋 I'm a backend engineer passionate about functional programming and type theory.
+        Currently working with Ruby/Rails, but my heart belongs to Haskell and the broader FP ecosystem.
+    </p>
+    <p>
+        I write about applying functional programming concepts in production, exploring type systems,
+        and navigating the journey of a software engineer in the real world.
+    </p>
+    <div style="margin-top: 1rem;">
+        <a href="/about.html">Learn more about me →</a>
+    </div>
+</section>
