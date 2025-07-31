@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A blog about functional programming, type theory, and software engineering by a backend engineer passionate about FP">
+    <title>Structural Induction, Formally: an Introduction to Agda - archbung :: Blog</title>
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
+    <link rel="alternate" type="application/rss+xml" title="archbung :: Blog RSS" href="../rss.xml">
+</head>
+<body>
+    <header id="header">
+        <div class="container">
+            <div id="logo">
+                <a href="../">
+                    <div class="type-signature">
+                        <span class="identifier">archbung</span>
+                        <span class="operator">::</span>
+                        <span class="type">Blog</span>
+                    </div>
+                </a>
+            </div>
+            <nav id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+                <a href="../about.html">About</a>
+                <a href="../rss.xml">RSS</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="content">
+        
+        <h1>Structural Induction, Formally: an Introduction to Agda</h1>
+        
+
+        <article>
+    <div class="info">
+        Posted on July 30, 2025
+        
+        
+    </div>
+
+    <p>In our <a href="./2024-10-23-structural-induction.html">previous</a> <a href="./2024-10-25-folding-left-and-right.html">posts</a>, we used pen-and-paper equational reasoning to prove properties about Haskell programs.
+While this works well, wouldn't it be nice if a computer could check our proofs for us, catching any mistakes we might make?</p>
+<p>This is where dependently-typed languages like Agda come in.
+By encoding our propositions as types and proofs as programs, we can have the compiler verify our reasoning is sound.
+In this post, let us define <a href="./2024-10-23-structural-induction.html">structural induction</a> more formally and then use it to show several results that we have seen previously.</p>
+<h2 id="proposition-as-types">Proposition as Types</h2>
+<p>While a more extensive treatment of dependent types is beyond the scope of this post, for now it is enough to know that one may encode propositions (i.e. things to prove) as types, due to a well-known result called the <a href="https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence">Curry-Howard isomorphism</a>.
+Proving those propositions, in turn, amounts to constructing elements of the types that correspond to said propositions.</p>
+<h2 id="equality-types">Equality Types</h2>
+<p>Perhaps the most important proposition to define is equality, that is, expressing whether two values are equal to one another.
+Since it is categorical error to ask whether two values of different types are equal or not, equality is necessarily parameterized by the type of the values.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="ot">_</span>≡<span class="ot">_</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">:</span> A <span class="ot">→</span> A <span class="ot">→</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  refl <span class="ot">:</span> <span class="ot">{</span>x <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> x ≡ x</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">infix</span> <span class="dv">4</span> <span class="ot">_</span>≡<span class="ot">_</span></span></code></pre></div>
+<p>Some remarks regarding the definition above:</p>
+<ul>
+<li>In Agda, enclosing a definition with <code>_</code> turns it into an operator (infix with precedence 4 in this case), which means that one may write something like <code>1 + 2 ≡ 3</code>.</li>
+<li>Indeed <code>≡</code> is parameterized by type <code>A</code>, which is also made implicit (note the curly braces) since <code>A</code> can often be deduced from <code>x</code>.</li>
+<li>It has only one constructor, <code>refl</code>, which one may pattern-match as usual.</li>
+</ul>
+<p>Additionally, it is also symmetric, transitive, and congruent.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sym <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>x y <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> x ≡ y <span class="ot">→</span> y ≡ x</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sym refl <span class="ot">=</span> refl</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>trans <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>x y z <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> x ≡ y <span class="ot">→</span> y ≡ z <span class="ot">→</span> x ≡ z</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>trans refl refl <span class="ot">=</span> refl</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>cong <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">{</span>x y <span class="ot">:</span> A<span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>f <span class="ot">:</span> A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> x ≡ y <span class="ot">→</span> f x ≡ f y</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>cong f refl <span class="ot">=</span> refl</span></code></pre></div>
+<p>The readers are encouraged to pause and take a few moments to think why the above proofs go through.</p>
+<p>The key insight is that <code>refl</code> is the only way to construct a proof of equality, and it only works when both sides are <em>definitionally</em> equal.
+When Agda accepts <code>refl</code> as a proof of <code>map f [] ≡ []</code>, it is because both sides reduce to the same value by the definitions of the functions involved.</p>
+<p>Similarly, when we pattern match on a proof of type <code>x ≡ y</code>, Agda learns that <code>x</code> and <code>y</code> must be the same, allowing us to substitute one for the other.</p>
+<h2 id="structural-induction-on-list">Structural Induction on List</h2>
+<p>Recall the definition of lists:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> List <span class="ot">(</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  [] <span class="ot">:</span> List A</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="ot">_</span>::<span class="ot">_</span> <span class="ot">:</span> A <span class="ot">→</span> List A <span class="ot">→</span> List A</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">infixr</span> <span class="dv">5</span> <span class="ot">_</span>::<span class="ot">_</span></span></code></pre></div>
+<p>As before, to show that a property holds for any list, one must show that it holds for both the <code>[]</code> case and the <code>_::_</code> case.
+Let us work on a couple of examples.</p>
+<h3 id="map-as-foldr"><code>map</code> as <code>foldr</code></h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>map <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> List A <span class="ot">→</span> List B</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>map f [] <span class="ot">=</span> []</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>map f <span class="ot">(</span>x :: xs<span class="ot">)</span> <span class="ot">=</span> f x :: map f xs</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>foldr <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>A <span class="ot">→</span> B <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> B <span class="ot">→</span> List A <span class="ot">→</span> B</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>foldr f z [] <span class="ot">=</span> z</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>foldr f z <span class="ot">(</span>x :: xs<span class="ot">)</span> <span class="ot">=</span> f x <span class="ot">(</span>foldr f z xs<span class="ot">)</span></span></code></pre></div>
+<p>And here is the result that we have previously:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>foldr-as-map <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>f <span class="ot">:</span> A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>xs <span class="ot">:</span> List A<span class="ot">)</span> <span class="ot">→</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  map f xs ≡ foldr <span class="ot">(λ</span> x acc <span class="ot">→</span> f x :: acc<span class="ot">)</span> [] xs</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>foldr-as-map f [] <span class="ot">=</span> refl</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>foldr-as-map f <span class="ot">(</span>x :: xs<span class="ot">)</span> <span class="ot">=</span> cong <span class="ot">(λ</span> c <span class="ot">→</span> f x :: c<span class="ot">)</span> <span class="ot">(</span>foldr-as-map f xs<span class="ot">)</span></span></code></pre></div>
+<p>Like before, the <code>[]</code> case is trivial (both sides are definitionally equal) so one may construct the equality directly with <code>refl</code>.
+On the other hand, the <code>x :: xs</code> case is a bit more involved that needs the congruence property of equality to go through.
+Here we also see that induction really is recursion: the inductive hypothesis is exactly the recursive call to <code>xs</code>.</p>
+<h3 id="foldl-as-foldr"><code>foldl</code> as <code>foldr</code></h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>foldl <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>B <span class="ot">→</span> A <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> B <span class="ot">→</span> List A <span class="ot">→</span> B</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>foldl f z [] <span class="ot">=</span> z</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>foldl f z <span class="ot">(</span>x :: xs<span class="ot">)</span> <span class="ot">=</span> foldl f <span class="ot">(</span>f z x<span class="ot">)</span> xs</span></code></pre></div>
+<p>As we have seen in <a href="./2024-10-25-folding-left-and-right.html">previously</a>, to show that one can define <code>foldl</code> and <code>foldr</code> it is necessary to generalize the property.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>foldl-as-foldr' <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>g <span class="ot">:</span> B <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>f <span class="ot">:</span> A <span class="ot">→</span> B <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>z <span class="ot">:</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>xs <span class="ot">:</span> List A<span class="ot">)</span> <span class="ot">→</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">(</span>foldr f z xs<span class="ot">)</span> ≡ foldl <span class="ot">(λ</span> g x y <span class="ot">→</span> g <span class="ot">(</span>f x y<span class="ot">))</span> g xs z</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>foldl-as-foldr' g f z [] <span class="ot">=</span> refl</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>foldl-as-foldr' g f z <span class="ot">(</span>x :: xs<span class="ot">)</span> <span class="ot">=</span> foldl-as-foldr' <span class="ot">(λ</span> y <span class="ot">→</span> g <span class="ot">(</span>f x y<span class="ot">))</span> f z xs</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>foldl-as-foldr <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>f <span class="ot">:</span> A <span class="ot">→</span> B <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>z <span class="ot">:</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>xs <span class="ot">:</span> List A<span class="ot">)</span> <span class="ot">→</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  foldr f z xs ≡ foldl <span class="ot">(λ</span> g x y <span class="ot">→</span> g <span class="ot">(</span>f x y<span class="ot">))</span> <span class="ot">(λ</span> x <span class="ot">→</span> x<span class="ot">)</span> xs z</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>foldl-as-foldr f z xs <span class="ot">=</span> foldl-as-foldr' <span class="ot">(λ</span> x <span class="ot">→</span> x<span class="ot">)</span> f z xs</span></code></pre></div>
+<p>Note that the proof turns out to be simpler since it turns out that we are really just updating the <code>g</code> on each recursive calls in <code>foldl-as-foldr'</code> above.</p>
+</article>
+
+<nav style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            
+        </div>
+        <div>
+            
+        </div>
+    </div>
+</nav>
+
+    </main>
+
+    <footer id="footer">
+        <div class="container">
+            <p>
+                © 2025 archbung. Built with <a href="http://jaspervdj.be/hakyll">Hakyll</a> and ❤️
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
