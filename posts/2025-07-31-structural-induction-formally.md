@@ -106,7 +106,7 @@ foldl f z [] = z
 foldl f z (x :: xs) = foldl f (f z x) xs
 ```
 
-As we have seen in [previously](./2024-10-25-folding-left-and-right.html), to show that one can define `foldl` and `foldr` it is necessary to generalize the property.
+As we have seen [previously](./2024-10-25-folding-left-and-right.html), to show that one can define `foldl` and `foldr` it is necessary to generalize the property.
 
 ``` agda
 foldl-as-foldr' : {A B : Set} → (g : B → B) → (f : A → B → B) → (z : B) → (xs : List A) →
@@ -119,4 +119,4 @@ foldl-as-foldr : {A B : Set} → (f : A → B → B) → (z : B) → (xs : List 
 foldl-as-foldr f z xs = foldl-as-foldr' (λ x → x) f z xs
 ```
 
-Note that the proof turns out to be simpler since it turns out that we are really just updating the `g` on each recursive calls in `foldl-as-foldr'` above.
+Note that the proof turns out to be simpler since we are really just updating the `g` on each recursive calls in `foldl-as-foldr'` above.
