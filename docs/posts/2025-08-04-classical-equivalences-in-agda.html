@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A blog about functional programming, type theory, and software engineering by a backend engineer passionate about FP">
+    <title>Classical Equivalences in Agda - archbung :: Blog</title>
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
+    <link rel="alternate" type="application/rss+xml" title="archbung :: Blog RSS" href="../rss.xml">
+</head>
+<body>
+    <header id="header">
+        <div class="container">
+            <div id="logo">
+                <a href="../">
+                    <div class="type-signature">
+                        <span class="identifier">archbung</span>
+                        <span class="operator">::</span>
+                        <span class="type">Blog</span>
+                    </div>
+                </a>
+            </div>
+            <nav id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+                <a href="../about.html">About</a>
+                <a href="../rss.xml">RSS</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="content">
+        
+        <h1>Classical Equivalences in Agda</h1>
+        
+
+        <article>
+    <div class="info">
+        Posted on August  4, 2025
+        
+        
+    </div>
+
+    <p>In the <a href="./2025-07-31-structural-induction-formally.html">previous post</a>, we briefly saw that in <a href="https://agda.readthedocs.io/en/latest/getting-started/what-is-agda.html">Agda</a> we can encode propositions as types and prove those propositions by showing that they are inhabited.
+Today we will see that there are logical principles that we often take for granted but turn out to be unprovable in Agda, which suggest that indeed there are fundamental differences between classical logic that we are familiar with, and the so-called constructive logic in Agda.</p>
+<h2 id="more-propositions-as-types">More Propositions as Types</h2>
+<h3 id="falsity">Falsity</h3>
+<p>The empty type <code>⊥</code> represents logical falsity, as it has no constructors and thus cannot be inhabited.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> ⊥ <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>absurd <span class="ot">:</span> <span class="ot">{</span>A <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> ⊥ <span class="ot">→</span> A</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>absurd <span class="ot">()</span></span></code></pre></div>
+<p>The <code>absurd</code> function expresses the principle of explosion: from a contradiction, anything follows.
+Note that we can pattern match on the empty pattern <code>()</code> since there are no constructors for <code>⊥</code>.</p>
+<h3 id="sum-types">Sum Types</h3>
+<p>Disjunction (logical or) is represented by sum types:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> Either <span class="ot">(</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  left <span class="ot">:</span> A <span class="ot">→</span> Either A B</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  right <span class="ot">:</span> B <span class="ot">→</span> Either A B</span></code></pre></div>
+<p>To prove <code>A ∨ B</code>, we must either provide a proof of <code>A</code> (via <code>left</code>) or a proof of <code>B</code> (via <code>right</code>).</p>
+<h3 id="negation">Negation</h3>
+<p>Negation is defined in terms of implication to falsity:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>¬<span class="ot">_</span> <span class="ot">:</span> <span class="dt">Set</span> <span class="ot">→</span> <span class="dt">Set</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>¬ A <span class="ot">=</span> A <span class="ot">→</span> ⊥</span></code></pre></div>
+<p>That is, <code>¬ A</code> means "assuming <code>A</code> leads to a contradiction."</p>
+<h2 id="classical-logic">Classical Logic</h2>
+<p>Simply put, we are in classical logic if we assume the Law of Excluded Middle (LEM):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lem <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> Either p <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">)</span></span></code></pre></div>
+<p>stating that either a proposition <code>p</code> is true or its negation is true.
+However, it is impossible to prove it in Agda since we would either need to construct an element of an arbitrary proposition <code>p</code> or show that <code>p</code> leads to a contradiction—but we know nothing about <code>p</code>!</p>
+<p>It turns out that there are other principles in classical logic that are equivalent to LEM.</p>
+<h3 id="double-negation-elimination-dne">Double Negation Elimination (DNE)</h3>
+<p>In classical logic, double negation elimination states that <code>¬¬p</code> implies <code>p</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dne <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">((</span>p <span class="ot">→</span> ⊥<span class="ot">)</span> <span class="ot">→</span> ⊥<span class="ot">)</span> <span class="ot">→</span> p</span></code></pre></div>
+<p>Note that the other direction, double negation introduction, is provable in Agda:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dni <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> p <span class="ot">→</span> <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">)</span> <span class="ot">→</span> ⊥</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>dni x f <span class="ot">=</span> f x</span></code></pre></div>
+<p>This simply says that if we have <code>p</code> and also <code>¬p</code>, we get a contradiction.</p>
+<p>It turns out that DNE is equivalent to LEM:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dne-lem <span class="ot">:</span> <span class="ot">(∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">((</span>p <span class="ot">→</span> ⊥<span class="ot">)</span> <span class="ot">→</span> ⊥<span class="ot">)</span> <span class="ot">→</span> p<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> Either p <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">))</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dne-lem f p <span class="ot">=</span> f <span class="ot">(</span>Either p <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">))</span> <span class="ot">(λ</span> g <span class="ot">→</span> g <span class="ot">(</span>right <span class="ot">(λ</span> x <span class="ot">→</span> g <span class="ot">(</span>left x<span class="ot">))))</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>lem-dne <span class="ot">:</span> <span class="ot">(∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> Either p <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">))</span> <span class="ot">→</span> <span class="ot">(∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">((</span>p <span class="ot">→</span> ⊥<span class="ot">)</span> <span class="ot">→</span> ⊥<span class="ot">)</span> <span class="ot">→</span> p<span class="ot">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>lem-dne f p h <span class="kw">with</span> f p</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ot">...</span> <span class="ot">|</span> left x <span class="ot">=</span> x</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ot">...</span> <span class="ot">|</span> right x <span class="ot">=</span> absurd <span class="ot">(</span>h x<span class="ot">)</span></span></code></pre></div>
+<ul>
+<li>To show that DNE implies LEM, we instantiate DNE with <code>p := Either p (p → ⊥)</code> (i.e., LEM itself) and construct the required double negation.
+The key insight is that if we assume <code>¬(p ∨ ¬p)</code>, then we can derive both <code>p</code> and <code>¬p</code>, leading to a contradiction.</li>
+<li>To show that LEM implies DNE, we simply instantiate LEM with the given proposition <code>p</code> and pattern match on the result.
+If we get <code>p</code> directly, we're done. If we get <code>¬p</code> but also know <code>¬¬p</code>, we have a contradiction.</li>
+</ul>
+<h3 id="peirces-law">Peirce's Law</h3>
+<p>Peirce's law is another classical principle:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>peirce <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>p q <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">((</span>p <span class="ot">→</span> q<span class="ot">)</span> <span class="ot">→</span> p<span class="ot">)</span> <span class="ot">→</span> p</span></code></pre></div>
+<p>It states that if assuming <code>p → q</code> gives us <code>p</code>, then <code>p</code> must be true.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>peirce-lem <span class="ot">:</span> <span class="ot">(∀</span> <span class="ot">(</span>p q <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">((</span>p <span class="ot">→</span> q<span class="ot">)</span> <span class="ot">→</span> p<span class="ot">)</span> <span class="ot">→</span> p<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> Either p <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">))</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>peirce-lem h p <span class="ot">=</span> h <span class="ot">(</span>Either p <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">))</span> ⊥ <span class="ot">(λ</span> f <span class="ot">→</span> right <span class="ot">(λ</span> x <span class="ot">→</span> f <span class="ot">(</span>left x<span class="ot">)))</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>lem-peirce <span class="ot">:</span> <span class="ot">(∀</span> <span class="ot">(</span>p <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> Either p <span class="ot">(</span>p <span class="ot">→</span> ⊥<span class="ot">))</span> <span class="ot">→</span> <span class="ot">(∀</span> <span class="ot">(</span>p q <span class="ot">:</span> <span class="dt">Set</span><span class="ot">)</span> <span class="ot">→</span> <span class="ot">((</span>p <span class="ot">→</span> q<span class="ot">)</span> <span class="ot">→</span> p<span class="ot">)</span> <span class="ot">→</span> p<span class="ot">)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>lem-peirce h p q f <span class="kw">with</span> h p</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="ot">...</span> <span class="ot">|</span> left x <span class="ot">=</span> x</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ot">...</span> <span class="ot">|</span> right x <span class="ot">=</span> f <span class="ot">(λ</span> y <span class="ot">→</span> absurd <span class="ot">(</span>x y<span class="ot">))</span></span></code></pre></div>
+<ul>
+<li>To show that Peirce's Law implies LEM, we again instantiate with LEM and construct the required function.
+If we assume <code>(p ∨ ¬p) → ⊥</code>, we can derive <code>¬p</code> and thus <code>p ∨ ¬p</code>, giving us a contradiction.</li>
+<li>To show that LEM implies Peirce's Law, we instantiate LEM with the given proposition <code>p</code> and pattern match.
+If we get <code>p</code> directly, we're done. If we get <code>¬p</code>, we can use the assumption <code>(p → q) → p</code> by providing a function that derives <code>p</code> from <code>¬p</code> (via contradiction).</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>What we've seen is that several logical principles that seem "obviously true" in classical logic are actually all equivalent to each other—and none of them are provable in Agda's constructive logic.
+This highlights a fundamental philosophical difference: constructive logic requires that we can actually construct witnesses for our proofs, while classical logic allows for reasoning by contradiction and excluded middle.</p>
+<p>The beauty of these equivalences is that they show how deeply interconnected these classical principles are.
+They all represent the same fundamental leap: from 'we cannot prove ¬p' to 'therefore p must be true.'
+Constructive logic rejects this leap, insisting that to establish p, we must construct an actual proof of p.</p>
+</article>
+
+<nav style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            
+        </div>
+        <div>
+            
+        </div>
+    </div>
+</nav>
+
+    </main>
+
+    <footer id="footer">
+        <div class="container">
+            <p>
+                © 2025 archbung. Built with <a href="http://jaspervdj.be/hakyll">Hakyll</a> and ❤️
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A blog about functional programming, type theory, and software engineering by a backend engineer passionate about FP">
-    <title>Structural Induction, Formally: an Introduction to Agda - archbung :: Blog</title>
+    <title>Structural Induction, Formally - archbung :: Blog</title>
     <link rel="stylesheet" type="text/css" href="../css/default.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
     <link rel="alternate" type="application/rss+xml" title="archbung :: Blog RSS" href="../rss.xml">
@@ -32,7 +32,7 @@
 
     <main id="content">
         
-        <h1>Structural Induction, Formally: an Introduction to Agda</h1>
+        <h1>Structural Induction, Formally</h1>
         
 
         <article>
@@ -44,10 +44,10 @@
 
     <p>In our <a href="./2024-10-23-structural-induction.html">previous</a> <a href="./2024-10-25-folding-left-and-right.html">posts</a>, we used pen-and-paper equational reasoning to prove properties about Haskell programs.
 While this works well, wouldn't it be nice if a computer could check our proofs for us, catching any mistakes we might make?</p>
-<p>This is where dependently-typed languages like Agda come in.
+<p>This is where dependently-typed languages like <a href="https://agda.readthedocs.io/en/latest/getting-started/what-is-agda.html">Agda</a> come in.
 By encoding our propositions as types and proofs as programs, we can have the compiler verify our reasoning is sound.
 In this post, let us define <a href="./2024-10-23-structural-induction.html">structural induction</a> more formally and then use it to show several results that we have seen previously.</p>
-<h2 id="proposition-as-types">Proposition as Types</h2>
+<h2 id="propositions-as-types">Propositions as Types</h2>
 <p>While a more extensive treatment of dependent types is beyond the scope of this post, for now it is enough to know that one may encode propositions (i.e. things to prove) as types, due to a well-known result called the <a href="https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence">Curry-Howard isomorphism</a>.
 Proving those propositions, in turn, amounts to constructing elements of the types that correspond to said propositions.</p>
 <h2 id="equality-types">Equality Types</h2>
@@ -112,7 +112,7 @@ Here we also see that induction really is recursion: the inductive hypothesis is
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>foldl-as-foldr <span class="ot">:</span> <span class="ot">{</span>A B <span class="ot">:</span> <span class="dt">Set</span><span class="ot">}</span> <span class="ot">→</span> <span class="ot">(</span>f <span class="ot">:</span> A <span class="ot">→</span> B <span class="ot">→</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>z <span class="ot">:</span> B<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>xs <span class="ot">:</span> List A<span class="ot">)</span> <span class="ot">→</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  foldr f z xs ≡ foldl <span class="ot">(λ</span> g x y <span class="ot">→</span> g <span class="ot">(</span>f x y<span class="ot">))</span> <span class="ot">(λ</span> x <span class="ot">→</span> x<span class="ot">)</span> xs z</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>foldl-as-foldr f z xs <span class="ot">=</span> foldl-as-foldr' <span class="ot">(λ</span> x <span class="ot">→</span> x<span class="ot">)</span> f z xs</span></code></pre></div>
-<p>Note that the proof turns out to be simpler since we are really just updating the <code>g</code> on each recursive calls in <code>foldl-as-foldr'</code> above.</p>
+<p>Note that the proof turns out to be simpler since we really are just updating the <code>g</code> on each recursive calls in <code>foldl-as-foldr'</code> above.</p>
 </article>
 
 <nav style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">

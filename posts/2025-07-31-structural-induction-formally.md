@@ -1,7 +1,7 @@
 ---
 date: 2025-07-30
 id: 9410b8be-2982-4529-be3b-e92f2b5205ae
-title: "Structural Induction, Formally: an Introduction to Agda"
+title: "Structural Induction, Formally"
 ---
 
 ```{=org}
@@ -13,11 +13,11 @@ title: "Structural Induction, Formally: an Introduction to Agda"
 In our [previous](./2024-10-23-structural-induction.html) [posts](./2024-10-25-folding-left-and-right.html), we used pen-and-paper equational reasoning to prove properties about Haskell programs.
 While this works well, wouldn\'t it be nice if a computer could check our proofs for us, catching any mistakes we might make?
 
-This is where dependently-typed languages like Agda come in.
+This is where dependently-typed languages like [Agda](https://agda.readthedocs.io/en/latest/getting-started/what-is-agda.html) come in.
 By encoding our propositions as types and proofs as programs, we can have the compiler verify our reasoning is sound.
 In this post, let us define [structural induction](./2024-10-23-structural-induction.html) more formally and then use it to show several results that we have seen previously.
 
-## Proposition as Types
+## Propositions as Types
 
 While a more extensive treatment of dependent types is beyond the scope of this post, for now it is enough to know that one may encode propositions (i.e. things to prove) as types, due to a well-known result called the [Curry-Howard isomorphism](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence).
 Proving those propositions, in turn, amounts to constructing elements of the types that correspond to said propositions.
@@ -119,4 +119,4 @@ foldl-as-foldr : {A B : Set} → (f : A → B → B) → (z : B) → (xs : List 
 foldl-as-foldr f z xs = foldl-as-foldr' (λ x → x) f z xs
 ```
 
-Note that the proof turns out to be simpler since we are really just updating the `g` on each recursive calls in `foldl-as-foldr'` above.
+Note that the proof turns out to be simpler since we really are just updating the `g` on each recursive calls in `foldl-as-foldr'` above.
