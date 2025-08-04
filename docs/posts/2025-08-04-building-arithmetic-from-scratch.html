@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A blog about functional programming, type theory, and software engineering by a backend engineer passionate about FP">
+    <title>Building Arithmetic from Scratch - archbung :: Blog</title>
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
+    <link rel="alternate" type="application/rss+xml" title="archbung :: Blog RSS" href="../rss.xml">
+</head>
+<body>
+    <header id="header">
+        <div class="container">
+            <div id="logo">
+                <a href="../">
+                    <div class="type-signature">
+                        <span class="identifier">archbung</span>
+                        <span class="operator">::</span>
+                        <span class="type">Blog</span>
+                    </div>
+                </a>
+            </div>
+            <nav id="navigation">
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+                <a href="../about.html">About</a>
+                <a href="../rss.xml">RSS</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="content">
+        
+        <h1>Building Arithmetic from Scratch</h1>
+        
+
+        <article>
+    <div class="info">
+        Posted on August  4, 2025
+        
+        
+    </div>
+
+    <p>In our everyday mathematics, we take for granted that addition is commutative and associative, that multiplication distributes over addition, and so on.
+But what if we had to build arithmetic from nothing but the concept of "next number"?
+In this post, let us construct natural numbers and their operations in Agda, proving each arithmetic property step by step using <a href="./2025-07-31-structural-induction-formally.html">structural induction</a>.</p>
+<h2 id="natural-numbers">Natural Numbers</h2>
+<p>We can inductively define natural numbers in Agda like so:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> Nat <span class="ot">:</span> <span class="dt">Set</span> <span class="kw">where</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  zero <span class="ot">:</span> Nat</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  succ <span class="ot">:</span> Nat <span class="ot">→</span> Nat</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">{-# BUILTIN NATURAL Nat #-}</span></span></code></pre></div>
+<p>The <code>BUILTIN NATURAL</code> pragma tells Agda to treat Haskell integers as natural numbers, allowing us to write <code>3</code> instead of <code>succ (succ (succ zero))</code>.
+More importantly, this makes operations efficient—without this pragma, each natural number <code>n</code> would take <span class="math inline"><em>O</em>(<em>n</em>)</span> memory instead of <span class="math inline"><em>O</em>(log <em>n</em>)</span>.</p>
+<p>Note that this definition captures exactly what natural numbers are: either zero, or the successor of some other natural number.</p>
+<h2 id="proving-vs-testing">Proving vs Testing</h2>
+<p>Before we dive into the proofs, it's worth emphasizing what we mean by "proving" here.
+Unlike testing, which can only show that a property holds for specific examples, our proofs in Agda establish that properties hold for <strong>all</strong> natural numbers.
+When we prove <code>+-comm</code>, we're not just checking that <code>2 + 3 ≡ 3 + 2</code>, but that addition is commutative for every possible pair of natural numbers.</p>
+<p>This is made possible by Agda's equality type and the proof techniques we established in our <a href="./2025-07-31-structural-induction-formally.html">previous post</a>, where we saw how <code>refl</code>, <code>sym</code>, <code>trans</code>, and <code>cong</code> work together to enable equational reasoning.</p>
+<h2 id="addition">Addition</h2>
+<p>Addition is defined recursively on the first argument:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ot">_</span>+<span class="ot">_</span> <span class="ot">:</span> Nat <span class="ot">→</span> Nat <span class="ot">→</span> Nat</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span> + m <span class="ot">=</span> m</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ot">(</span>succ n<span class="ot">)</span> + m <span class="ot">=</span> succ <span class="ot">(</span>n + m<span class="ot">)</span></span></code></pre></div>
+<p>This definition embodies the intuition that adding <code>m</code> to the successor of <code>n</code> is the same as taking the successor of <code>n + m</code>.</p>
+<h3 id="associativity">Associativity</h3>
+<p>One of the most basic properties of addition is associativity:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>+-assoc <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>n m o <span class="ot">:</span> Nat<span class="ot">)</span> <span class="ot">→</span> n + <span class="ot">(</span>m + o<span class="ot">)</span> ≡ <span class="ot">(</span>n + m<span class="ot">)</span> + o</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>+-assoc zero m o <span class="ot">=</span> refl</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>+-assoc <span class="ot">(</span>succ n<span class="ot">)</span> m o <span class="ot">=</span> cong succ <span class="ot">(</span>+-assoc n m o<span class="ot">)</span></span></code></pre></div>
+<p>The proof proceeds by structural induction on <code>n</code>:</p>
+<ul>
+<li>Base case <code>n = 0</code>: We need to show <code>0 + (m + o) ≡ (0 + m) + o</code>, which simplifies to <code>m + o ≡ m + o</code> by the definition of addition.</li>
+<li>Inductive case <code>n = succ n</code>: We need to show <code>succ n + (m + o) ≡ (succ n + m) + o</code>.
+By the definition of addition, this becomes <code>succ (n + (m + o)) ≡ succ ((n + m) + o)</code>.
+Using congruence and the inductive hypothesis, this follows immediately.</li>
+</ul>
+<h3 id="right-identity-and-successor-lemmas">Right Identity and Successor Lemmas</h3>
+<p>To prove commutativity, we first need two helper lemmas that aren't immediately obvious from our definition:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>+-m-z <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>m <span class="ot">:</span> Nat<span class="ot">)</span> <span class="ot">→</span> m ≡ m + <span class="dv">0</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>+-m-z zero <span class="ot">=</span> refl</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>+-m-z <span class="ot">(</span>succ m<span class="ot">)</span> <span class="ot">=</span> cong succ <span class="ot">(</span>+-m-z m<span class="ot">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>+-m-s <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>n m <span class="ot">:</span> Nat<span class="ot">)</span> <span class="ot">→</span> succ n + m ≡ n + succ m</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>+-m-s zero m <span class="ot">=</span> refl</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>+-m-s <span class="ot">(</span>succ n<span class="ot">)</span> m <span class="ot">=</span> cong succ <span class="ot">(</span>+-m-s n m<span class="ot">)</span></span></code></pre></div>
+<p>The first lemma shows that <code>0</code> is a right identity for addition (not just a left identity as our definition makes obvious).
+The second shows that we can "move" a successor from the first argument to the second.
+Both require induction to prove, highlighting how even simple properties need careful justification when building from first principles.</p>
+<h3 id="commutativity">Commutativity</h3>
+<p>With these lemmas in hand, we can prove commutativity:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>+-comm <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>n m <span class="ot">:</span> Nat<span class="ot">)</span> <span class="ot">→</span> n + m ≡ m + n</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>+-comm zero m <span class="ot">=</span> +-m-z m</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>+-comm <span class="ot">(</span>succ n<span class="ot">)</span> m <span class="ot">=</span> trans <span class="ot">(</span>cong succ <span class="ot">(</span>+-comm n m<span class="ot">))</span> <span class="ot">(</span>+-m-s m n<span class="ot">)</span></span></code></pre></div>
+<p>The proof again proceeds by induction on <code>n</code>:</p>
+<ul>
+<li>Base case <code>n = 0</code>: We need <code>0 + m ≡ m + 0</code>, which follows from our right identity lemma.</li>
+<li>Inductive case <code>n = succ n</code>: We need <code>succ n + m ≡ m + succ n</code>.
+This becomes <code>succ (n + m) ≡ m + succ n</code>.
+By the inductive hypothesis, <code>n + m ≡ m + n</code>, so <code>succ (n + m) ≡ succ (m + n)</code>.
+Finally, our successor lemma gives us <code>succ (m + n) ≡ m + succ n</code>.</li>
+</ul>
+<h2 id="multiplication">Multiplication</h2>
+<p>As expected, multiplication is defined in terms of addition:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ot">_</span>*<span class="ot">_</span> <span class="ot">:</span> Nat <span class="ot">→</span> Nat <span class="ot">→</span> Nat</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span> * m <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ot">(</span>succ n<span class="ot">)</span> * m <span class="ot">=</span> m + <span class="ot">(</span>n * m<span class="ot">)</span></span></code></pre></div>
+<p>This captures the idea that multiplying by the successor of <code>n</code> means adding <code>m</code> to the result of multiplying by <code>n</code>.</p>
+<h3 id="distributivity">Distributivity</h3>
+<p>Multiplication distributes over addition:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>*-+-dist <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>n m o <span class="ot">:</span> Nat<span class="ot">)</span> <span class="ot">→</span> <span class="ot">(</span>n * o<span class="ot">)</span> + <span class="ot">(</span>m * o<span class="ot">)</span> ≡ <span class="ot">(</span>n + m<span class="ot">)</span> * o</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>*-+-dist zero m o <span class="ot">=</span> refl</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>*-+-dist <span class="ot">(</span>succ n<span class="ot">)</span> m o <span class="ot">=</span> trans <span class="ot">(</span>sym <span class="ot">(</span>+-assoc o <span class="ot">(</span>n * o<span class="ot">)</span> <span class="ot">(</span>m * o<span class="ot">)))</span> <span class="ot">(</span>cong <span class="ot">(λ</span> c <span class="ot">→</span> o + c<span class="ot">)</span> <span class="ot">(</span>*-+-dist n m o<span class="ot">))</span></span></code></pre></div>
+<p>The proof is by induction on <code>n</code>:</p>
+<ul>
+<li>Base case <code>n = 0</code>: We need <code>(0 * o) + (m * o) ≡ (0 + m) * o</code>, which simplifies to <code>0 + (m * o) ≡ m * o</code>.</li>
+<li>Inductive case: We need <code>(succ n * o) + (m * o) ≡ (succ n + m) * o</code>.
+This becomes <code>(o + (n * o)) + (m * o) ≡ o + ((n + m) * o)</code>.
+Using associativity of addition and the inductive hypothesis, this follows.</li>
+</ul>
+<h3 id="associativity-1">Associativity</h3>
+<p>Finally, multiplication is associative:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode agda"><code class="sourceCode agda"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>*-assoc <span class="ot">:</span> <span class="ot">∀</span> <span class="ot">(</span>n m o <span class="ot">:</span> Nat<span class="ot">)</span> <span class="ot">→</span> n * <span class="ot">(</span>m * o<span class="ot">)</span> ≡ <span class="ot">(</span>n * m<span class="ot">)</span> * o</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>*-assoc zero m o <span class="ot">=</span> refl</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>*-assoc <span class="ot">(</span>succ n<span class="ot">)</span> m o <span class="ot">=</span> trans <span class="ot">(</span>cong <span class="ot">(λ</span> c <span class="ot">→</span> <span class="ot">(</span>m * o<span class="ot">)</span> + c<span class="ot">)</span> <span class="ot">(</span>*-assoc n m o<span class="ot">))</span> <span class="ot">(</span>*-+-dist m <span class="ot">(</span>n * m<span class="ot">)</span> o<span class="ot">)</span></span></code></pre></div>
+<p>The proof combines our previous results:</p>
+<ul>
+<li>Base case <code>n = 0</code>: Trivial by definition.</li>
+<li>Inductive case: We need <code>succ n * (m * o) ≡ (succ n * m) * o</code>.
+This becomes <code>(m * o) + (n * (m * o)) ≡ (m + (n * m)) * o</code>.
+Using the inductive hypothesis and distributivity, this follows.</li>
+</ul>
+<h2 id="exercises">Exercises</h2>
+<ol type="1">
+<li>Prove that <code>0</code> is a right identity for multiplication: <code>∀ (m : Nat) → m * 0 ≡ 0</code>.</li>
+<li>Prove that multiplication is commutative: <code>∀ (n m : Nat) → n * m ≡ m * n</code>.
+(Hint: You'll need helper lemmas similar to those we used for addition.)</li>
+<li>Define exponentiation and prove that <code>(n ^ m) ^ o ≡ n ^ (m * o)</code>.</li>
+</ol>
+<h2 id="conclusions">Conclusions</h2>
+<p>The beauty of this approach is that every property we "obviously know" about arithmetic must be carefully justified.
+In building mathematics from the ground up, we see exactly which assumptions we need and how they combine to give us the rich structure of arithmetic.</p>
+</article>
+
+<nav style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            
+        </div>
+        <div>
+            
+        </div>
+    </div>
+</nav>
+
+    </main>
+
+    <footer id="footer">
+        <div class="container">
+            <p>
+                © 2025 archbung. Built with <a href="http://jaspervdj.be/hakyll">Hakyll</a> and ❤️
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
